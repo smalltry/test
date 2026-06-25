@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#09111d">
+  <title>Basketball Select Draft</title>
+  <style>
+    :root {
+      --bg: #08111f;
+      --panel: rgba(10, 21, 37, 0.84);
+      --panel-strong: rgba(12, 25, 44, 0.94);
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #f6fbff;
+      --muted: #9db1c8;
+      --orange: #ff7a00;
+      --orange-soft: #ffbf6b;
+      --cyan: #36e3dd;
+      --green: #90f77b;
+      --danger: #ff6b74;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(255, 122, 0, 0.26), transparent 34%),
+        radial-gradient(circle at 100% 12%, rgba(54, 227, 221, 0.18), transparent 26%),
+        linear-gradient(180deg, #0a1220 0%, #08111f 44%, #050910 100%);
+      font-family: "Bahnschrift", "DIN Alternate", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 999px;
+      pointer-events: none;
+      filter: blur(14px);
+      opacity: 0.68;
+    }
+
+    body::before {
+      width: 220px;
+      height: 220px;
+      top: 88px;
+      right: -70px;
+      background: radial-gradient(circle, rgba(255, 122, 0, 0.58), rgba(255, 122, 0, 0));
+    }
+
+    body::after {
+      width: 190px;
+      height: 190px;
+      bottom: 150px;
+      left: -60px;
+      background: radial-gradient(circle, rgba(54, 227, 221, 0.42), rgba(54, 227, 221, 0));
+    }
+
+    .court {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.84) 12%, rgba(0, 0, 0, 0.9) 88%, transparent);
+    }
+
+    .app {
+      position: relative;
+      width: min(100%, 820px);
+      margin: 0 auto;
+      padding: 18px 14px calc(36px + env(safe-area-inset-bottom));
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 14px;
+      padding: 18px;
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      animation: panel-in 0.55s ease both;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), transparent 40%);
+      pointer-events: none;
+    }
+
+    .hero {
+      padding-top: 22px;
+      background:
+        linear-gradient(140deg, rgba(255, 122, 0, 0.18), rgba(54, 227, 221, 0.08)),
+        var(--panel-strong);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--orange-soft);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--orange-soft), var(--orange));
+      box-shadow: 0 0 14px rgba(255, 122, 0, 0.75);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .hero h1 {
+      margin-top: 14px;
+      font-family: "Impact", "Haettenschweiler", "Arial Narrow Bold", sans-serif;
+      font-size: clamp(34px, 8vw, 56px);
+      line-height: 0.92;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero p {
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-height: 84px;
+    }
+
+    .stat-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.04;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-head h2 {
+      font-size: 18px;
+      letter-spacing: 0.04em;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    textarea,
+    input {
+      width: 100%;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.05);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    textarea:focus,
+    input:focus {
+      transform: translateY(-1px);
+      border-color: rgba(54, 227, 221, 0.8);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    textarea {
+      min-height: 110px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      line-height: 1.65;
+      resize: vertical;
+      font-size: 15px;
+    }
+
+    .roster-actions,
+    .btn-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .player-chip {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 52px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .player-chip:active {
+      transform: scale(0.98);
+    }
+
+    .player-chip .index {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .player-chip .name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .player-chip .state {
+      flex-shrink: 0;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+    }
+
+    .player-chip.active {
+      border-color: rgba(255, 122, 0, 0.34);
+      background: linear-gradient(135deg, rgba(255, 122, 0, 0.22), rgba(255, 255, 255, 0.07));
+      box-shadow: 0 14px 28px rgba(255, 122, 0, 0.16);
+    }
+
+    .player-chip.active .state {
+      color: #fff4db;
+      background: rgba(255, 122, 0, 0.18);
+    }
+
+    .player-chip.active::after {
+      content: "";
+      position: absolute;
+      inset: auto 12px 0 auto;
+      width: 58px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--orange), var(--orange-soft));
+    }
+
+    .control-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field-card {
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .field-card label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .field-card input {
+      height: 48px;
+      padding: 0 14px;
+      border-radius: 16px;
+      font-size: 16px;
+    }
+
+    .field-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 18px;
+      padding: 14px 16px;
+      color: var(--text);
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange), #ff9b44);
+      box-shadow: 0 14px 30px rgba(255, 122, 0, 0.28);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, rgba(54, 227, 221, 0.18), rgba(54, 227, 221, 0.07));
+      border: 1px solid rgba(54, 227, 221, 0.28);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-danger {
+      background: rgba(255, 107, 116, 0.14);
+      border: 1px solid rgba(255, 107, 116, 0.22);
+      color: #ffd9dd;
+    }
+
+    .tiny-btn {
+      padding: 9px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tag.good {
+      color: #c9ffba;
+      background: rgba(144, 247, 123, 0.12);
+    }
+
+    .tag.warn {
+      color: #ffd8a4;
+      background: rgba(255, 122, 0, 0.12);
+    }
+
+    .message {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.55;
+      border: 1px solid transparent;
+    }
+
+    .message.show {
+      display: block;
+      animation: panel-in 0.35s ease both;
+    }
+
+    .message.info {
+      color: #cbf8ff;
+      background: rgba(54, 227, 221, 0.12);
+      border-color: rgba(54, 227, 221, 0.18);
+    }
+
+    .message.warn {
+      color: #ffe1b4;
+      background: rgba(255, 122, 0, 0.12);
+      border-color: rgba(255, 122, 0, 0.2);
+    }
+
+    .message.error {
+      color: #ffd4d8;
+      background: rgba(255, 107, 116, 0.12);
+      border-color: rgba(255, 107, 116, 0.2);
+    }
+
+    .results-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .results-head p {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .results {
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-card,
+    .empty-card {
+      padding: 15px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .result-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent, linear-gradient(90deg, var(--orange), var(--cyan)));
+    }
+
+    .result-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .result-title h3 {
+      font-size: 18px;
+      letter-spacing: 0.03em;
+    }
+
+    .mini-tag {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .member-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .member {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+    }
+
+    .empty-card {
+      text-align: center;
+      color: var(--muted);
+      padding: 22px 16px;
+    }
+
+    .footer-note {
+      margin-top: 6px;
+      color: rgba(157, 177, 200, 0.82);
+      font-size: 12px;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    @keyframes panel-in {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (min-width: 720px) {
+      .config-layout {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 14px;
+      }
+
+      .player-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="court"></div>
+  <main class="app">
+    <section class="panel hero">
+      <span class="eyebrow">Mobile Draft Engine</span>
+      <h1>Basketball Select Draft</h1>
+      <p>默认名单先摆出来，点中谁，谁就参加分组。你只要设置每组人数，系统会按固定人数随机分组，凑不满一组的人会留在未分配区，所有数据保存在本地。</p>
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-label">默认名单</span>
+          <span class="stat-value" id="rosterCount">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">已选参赛</span>
+          <span class="stat-value" id="selectedCount">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">自动分组</span>
+          <span class="stat-value" id="groupCount">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">未分配</span>
+          <span class="stat-value" id="leftoverCount">0</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="config-layout">
+      <section class="panel">
+        <div class="section-head">
+          <h2>默认球员池</h2>
+          <span class="hint">可编辑，更新后下方名单同步</span>
+        </div>
+        <textarea id="rosterInput" placeholder="一行一个名字，或用逗号分隔"></textarea>
+        <div class="roster-actions">
+          <button class="btn-secondary" id="applyRosterBtn" type="button">更新名单</button>
+          <button class="btn-ghost" id="resetSelectionBtn" type="button">清空选中</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>分组配置</h2>
+          <span class="hint">每组人数固定一致</span>
+        </div>
+        <div class="control-grid">
+          <div class="field-card">
+            <label for="groupSizeInput">每组目标人数</label>
+            <input id="groupSizeInput" type="number" min="1" inputmode="numeric">
+            <p class="field-note">例如填 `3`，如果选中 10 人，会分成 `3` 组各 `3` 人，剩下 `1` 人留在未分配。</p>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" id="shuffleBtn" type="button">开始随机分组</button>
+          <button class="btn-danger" id="resetAllBtn" type="button">重置全部</button>
+        </div>
+        <div class="status-bar" id="statusBar"></div>
+        <div class="message" id="messageBox"></div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="section-head">
+        <h2>点击选择参赛球员</h2>
+        <button class="btn-secondary tiny-btn" id="selectAllBtn" type="button">全选</button>
+      </div>
+      <div class="player-grid" id="playerGrid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="results-head">
+        <div>
+          <h2>分组结果</h2>
+        </div>
+        <p id="resultTime">还没有进行分组</p>
+      </div>
+      <div class="results" id="resultsContainer"></div>
+    </section>
+
+    <p class="footer-note">纯静态页面，数据仅保存在当前浏览器本地。修改名单、选中状态或每组人数后，旧结果会自动标记为已过期。</p>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "basketball-select-draft-v2";
+    const GROUP_ACCENTS = [
+      "linear-gradient(90deg, #ff7a00, #ffbf6b)",
+      "linear-gradient(90deg, #36e3dd, #1597ff)",
+      "linear-gradient(90deg, #90f77b, #17bd78)",
+      "linear-gradient(90deg, #ffd166, #ff7a00)",
+      "linear-gradient(90deg, #7dd3fc, #36e3dd)"
+    ];
+    const DEFAULT_ROSTER = [
+      "刘小流",
+      "张凡",
+      "姚钊",
+      "梁志斌",
+      "吴亚文",
+      "肖川",
+      "黄刚",
+      "吴洁",
+      "邓建国",
+      "夏海涛"
+    ];
+
+    const defaultState = {
+      rosterText: DEFAULT_ROSTER.join("\n"),
+      selectedPlayers: DEFAULT_ROSTER.slice(0, 10),
+      groupSize: 3,
+      result: null
+    };
+
+    let state = loadState();
+
+    const rosterInput = document.getElementById("rosterInput");
+    const groupSizeInput = document.getElementById("groupSizeInput");
+    const applyRosterBtn = document.getElementById("applyRosterBtn");
+    const resetSelectionBtn = document.getElementById("resetSelectionBtn");
+    const selectAllBtn = document.getElementById("selectAllBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const resetAllBtn = document.getElementById("resetAllBtn");
+    const playerGrid = document.getElementById("playerGrid");
+    const resultsContainer = document.getElementById("resultsContainer");
+    const messageBox = document.getElementById("messageBox");
+    const resultTime = document.getElementById("resultTime");
+    const statusBar = document.getElementById("statusBar");
+    const rosterCount = document.getElementById("rosterCount");
+    const selectedCount = document.getElementById("selectedCount");
+    const groupCount = document.getElementById("groupCount");
+    const leftoverCount = document.getElementById("leftoverCount");
+
+    rosterInput.value = state.rosterText;
+    groupSizeInput.value = state.groupSize;
+    renderAll();
+
+    applyRosterBtn.addEventListener("click", () => {
+      const roster = parseRoster(rosterInput.value);
+
+      if (!roster.length) {
+        flashMessage("默认球员池不能为空。", "error");
+        return;
+      }
+
+      state.rosterText = roster.join("\n");
+      state.selectedPlayers = state.selectedPlayers.filter((name) => roster.includes(name));
+      persistState();
+      rosterInput.value = state.rosterText;
+      renderAll();
+      flashMessage("默认名单已更新，选中状态已按新名单同步。", "info");
+    });
+
+    resetSelectionBtn.addEventListener("click", () => {
+      state.selectedPlayers = [];
+      persistState();
+      renderAll();
+      flashMessage("已清空参赛球员选择。", "warn");
+    });
+
+    selectAllBtn.addEventListener("click", () => {
+      state.selectedPlayers = getRoster();
+      persistState();
+      renderAll();
+      flashMessage("已全选当前默认名单。", "info");
+    });
+
+    groupSizeInput.addEventListener("input", (event) => {
+      state.groupSize = sanitizeGroupSize(event.target.value);
+      persistState();
+      renderSummary();
+      renderStatus();
+      renderResults();
+    });
+
+    shuffleBtn.addEventListener("click", () => {
+      const players = getSelectedPlayers();
+      const preferredGroupSize = sanitizeGroupSize(state.groupSize);
+
+      if (!players.length) {
+        flashMessage("请先点击选择至少 1 名参赛球员。", "error");
+        return;
+      }
+
+      if (!preferredGroupSize) {
+        flashMessage("请设置有效的每组目标人数。", "error");
+        return;
+      }
+
+      const shuffled = fisherYates(players.slice());
+      const split = buildFixedGroups(players.length, preferredGroupSize);
+      const groups = [];
+      let cursor = 0;
+
+      split.groupSizes.forEach((size, index) => {
+        groups.push({
+          name: `第 ${index + 1} 组`,
+          size,
+          members: shuffled.slice(cursor, cursor + size)
+        });
+        cursor += size;
+      });
+
+      state.result = {
+        groups,
+        leftovers: shuffled.slice(cursor),
+        assignedAt: new Date().toISOString(),
+        sourceSignature: getSourceSignature()
+      };
+
+      persistState();
+      renderAll();
+      flashMessage("随机分组完成，所有已成组队伍人数完全一致。", "info");
+      document.querySelector(".results-head").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    resetAllBtn.addEventListener("click", () => {
+      if (!window.confirm("确定重置默认名单、选中状态和分组结果吗？")) {
+        return;
+      }
+
+      localStorage.removeItem(STORAGE_KEY);
+      state = cloneDefaultState();
+      rosterInput.value = state.rosterText;
+      groupSizeInput.value = state.groupSize;
+      renderAll();
+      flashMessage("已恢复默认名单和默认配置。", "warn");
+    });
+
+    function renderAll() {
+      renderPlayerGrid();
+      renderSummary();
+      renderStatus();
+      renderResults();
+    }
+
+    function renderPlayerGrid() {
+      const roster = getRoster();
+      const selectedSet = new Set(state.selectedPlayers);
+
+      if (!roster.length) {
+        playerGrid.innerHTML = `
+          <div class="empty-card">
+            <p>当前没有默认球员，请先编辑并更新名单。</p>
+          </div>
+        `;
+        return;
+      }
+
+      playerGrid.innerHTML = roster.map((name, index) => `
+        <button
+          type="button"
+          class="player-chip ${selectedSet.has(name) ? "active" : ""}"
+          data-player="${escapeHtml(name)}"
+        >
+          <span>
+            <span class="index">Player ${String(index + 1).padStart(2, "0")}</span>
+            <span class="name">${escapeHtml(name)}</span>
+          </span>
+          <span class="state">${selectedSet.has(name) ? "参赛" : "待命"}</span>
+        </button>
+      `).join("");
+
+      playerGrid.querySelectorAll(".player-chip").forEach((button) => {
+        button.addEventListener("click", () => {
+          togglePlayer(button.dataset.player || "");
+        });
+      });
+    }
+
+    function renderSummary() {
+      const roster = getRoster();
+      const players = getSelectedPlayers();
+      const preferredGroupSize = sanitizeGroupSize(state.groupSize);
+      const split = players.length && preferredGroupSize
+        ? buildFixedGroups(players.length, preferredGroupSize)
+        : { groupSizes: [], leftoverCount: 0 };
+
+      rosterCount.textContent = String(roster.length);
+      selectedCount.textContent = String(players.length);
+      groupCount.textContent = String(split.groupSizes.length);
+      leftoverCount.textContent = String(split.leftoverCount);
+    }
+
+    function renderStatus() {
+      const players = getSelectedPlayers();
+      const preferredGroupSize = sanitizeGroupSize(state.groupSize);
+      const tags = [];
+
+      tags.push(`<span class="tag">目标每组 ${preferredGroupSize || 0} 人</span>`);
+
+      if (players.length && preferredGroupSize) {
+        const split = buildFixedGroups(players.length, preferredGroupSize);
+
+        if (split.groupSizes.length) {
+          tags.push(`<span class="tag good">可组成 ${split.groupSizes.length} 组固定队伍</span>`);
+        } else {
+          tags.push(`<span class="tag warn">当前人数还凑不满 1 组</span>`);
+        }
+
+        if (split.leftoverCount) {
+          tags.push(`<span class="tag warn">剩余 ${split.leftoverCount} 人未分配</span>`);
+        }
+      } else {
+        tags.push(`<span class="tag warn">等待选择球员并设置人数</span>`);
+      }
+
+      if (state.result && isResultStale()) {
+        tags.push(`<span class="tag warn">当前结果已过期，需重新分组</span>`);
+      } else if (state.result) {
+        tags.push(`<span class="tag good">最近一次结果已保存在本地</span>`);
+      }
+
+      statusBar.innerHTML = tags.join("");
+    }
+
+    function renderResults() {
+      const result = state.result;
+
+      if (!result || !Array.isArray(result.groups) || !Array.isArray(result.leftovers)) {
+        resultsContainer.innerHTML = `
+          <div class="empty-card">
+            <p>先从默认球员池里点人参赛，再点击“开始随机分组”。</p>
+          </div>
+        `;
+        resultTime.textContent = "还没有进行分组";
+        return;
+      }
+
+      const assignedTime = new Intl.DateTimeFormat("zh-CN", {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(result.assignedAt));
+
+      resultTime.textContent = `${assignedTime} 已生成${isResultStale() ? " · 当前配置已修改" : ""}`;
+
+      const groupCards = result.groups.map((group, index) => `
+        <div class="result-card" style="--accent: ${GROUP_ACCENTS[index % GROUP_ACCENTS.length]};">
+          <div class="result-title">
+            <h3>${escapeHtml(group.name)}</h3>
+            <span class="mini-tag">${group.members.length} 人</span>
+          </div>
+          <div class="member-list">
+            ${group.members.map((name) => `<span class="member">${escapeHtml(name)}</span>`).join("")}
+          </div>
+        </div>
+      `).join("");
+
+      const leftoverCard = result.leftovers.length ? `
+        <div class="result-card" style="--accent: linear-gradient(90deg, #ff6b74, #ffb86b);">
+          <div class="result-title">
+            <h3>未分配</h3>
+            <span class="mini-tag">${result.leftovers.length} 人</span>
+          </div>
+          <div class="member-list">
+            ${result.leftovers.map((name) => `<span class="member">${escapeHtml(name)}</span>`).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      resultsContainer.innerHTML = groupCards + leftoverCard;
+    }
+
+    function togglePlayer(name) {
+      if (!name) {
+        return;
+      }
+
+      const selectedSet = new Set(state.selectedPlayers);
+      if (selectedSet.has(name)) {
+        selectedSet.delete(name);
+      } else {
+        selectedSet.add(name);
+      }
+
+      state.selectedPlayers = getRoster().filter((player) => selectedSet.has(player));
+      persistState();
+      renderAll();
+    }
+
+    function getRoster() {
+      return parseRoster(state.rosterText);
+    }
+
+    function getSelectedPlayers() {
+      const roster = getRoster();
+      const rosterSet = new Set(roster);
+      return state.selectedPlayers.filter((name) => rosterSet.has(name));
+    }
+
+    function parseRoster(text) {
+      const seen = new Set();
+      return text
+        .split(/[\n,，]/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .filter((name) => {
+          if (seen.has(name)) {
+            return false;
+          }
+          seen.add(name);
+          return true;
+        });
+    }
+
+    function buildFixedGroups(totalPlayers, preferredGroupSize) {
+      if (!totalPlayers || !preferredGroupSize) {
+        return { groupSizes: [], leftoverCount: 0 };
+      }
+
+      const groupTotal = Math.floor(totalPlayers / preferredGroupSize);
+      const groupSizes = [];
+
+      for (let index = 0; index < groupTotal; index += 1) {
+        groupSizes.push(preferredGroupSize);
+      }
+
+      return {
+        groupSizes,
+        leftoverCount: totalPlayers - (groupTotal * preferredGroupSize)
+      };
+    }
+
+    function sanitizeGroupSize(value) {
+      const size = Number.parseInt(value, 10);
+      return Number.isFinite(size) && size > 0 ? size : 0;
+    }
+
+    function getSourceSignature() {
+      const snapshot = {
+        roster: getRoster(),
+        selectedPlayers: getSelectedPlayers(),
+        groupSize: sanitizeGroupSize(state.groupSize)
+      };
+      return JSON.stringify(snapshot);
+    }
+
+    function isResultStale() {
+      return !state.result || state.result.sourceSignature !== getSourceSignature();
+    }
+
+    function persistState() {
+      const roster = parseRoster(state.rosterText);
+      const rosterSet = new Set(roster);
+
+      state.rosterText = roster.join("\n");
+      state.selectedPlayers = state.selectedPlayers.filter((name) => rosterSet.has(name));
+      state.groupSize = sanitizeGroupSize(state.groupSize);
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        flashMessage("本地保存失败，可能是浏览器禁用了本地存储。", "warn");
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return cloneDefaultState();
+        }
+
+        const parsed = JSON.parse(raw);
+        const rosterText = typeof parsed.rosterText === "string" ? parsed.rosterText : defaultState.rosterText;
+        const roster = parseRoster(rosterText);
+        const rosterSet = new Set(roster);
+
+        return {
+          rosterText: roster.join("\n") || defaultState.rosterText,
+          selectedPlayers: Array.isArray(parsed.selectedPlayers)
+            ? parsed.selectedPlayers.filter((name) => rosterSet.has(name))
+            : defaultState.selectedPlayers,
+          groupSize: sanitizeGroupSize(parsed.groupSize) || defaultState.groupSize,
+          result: parsed.result && Array.isArray(parsed.result.groups) ? parsed.result : null
+        };
+      } catch (error) {
+        return cloneDefaultState();
+      }
+    }
+
+    function cloneDefaultState() {
+      return {
+        rosterText: defaultState.rosterText,
+        selectedPlayers: defaultState.selectedPlayers.slice(),
+        groupSize: defaultState.groupSize,
+        result: null
+      };
+    }
+
+    function fisherYates(list) {
+      for (let index = list.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [list[index], list[randomIndex]] = [list[randomIndex], list[index]];
+      }
+      return list;
+    }
+
+    function flashMessage(text, type) {
+      messageBox.textContent = text;
+      messageBox.className = `message show ${type}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+  </script>
+</body>
+</html>
